@@ -4,10 +4,9 @@ kind: Kustomization
 namespace: devsecops
 resources:
   - ../../base
-
 replicas:
   - name: devsecops-demo
     count: 4
 images:
   - name: aimocont2020/devsecops-demo
-    newTag: "d9225a8865ce"
+    newTag: "0fa9cb9a79ca"
