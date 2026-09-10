@@ -7,20 +7,15 @@ on:
       - main
     paths-ignore:
       - "k8s/overlays/poc/kustomization.yaml"
-
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - "k8s/overlays/poc/kustomization.yaml"
 
 permissions:
   contents: write
 
 env:
   IMAGE_NAME: devsecops-demo
-  KUSTOMIZE_FILE: k8s/overlays/poc/kustomization.yaml
-  ARGOCD_APP: devsecops-demo
 
 jobs:
   lint-and-security:
@@ -58,10 +53,11 @@ jobs:
           soft_fail: true
 
   build-scan-push:
-    name: Build, scan, push and verify
+    name: Build, scan, push and update GitOps
     runs-on: ubuntu-latest
     needs: lint-and-security
 
+    # Do not build/push images for pull requests.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
@@ -75,9 +71,9 @@ jobs:
         run: |
           echo "tag=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
 
-      - name: Show generated image tag
+      - name: Display image tag
         run: |
-          echo "Image tag: ${{ steps.vars.outputs.tag }}"
+          echo "New image tag: ${{ steps.vars.outputs.tag }}"
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -107,119 +103,36 @@ jobs:
           docker push \
             "${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:${{ steps.vars.outputs.tag }}"
 
-      - name: Update Kustomize image tag
+      - name: Install yq
         uses: mikefarah/yq@v4
-        with:
-          cmd: >-
-            yq -i
-            '.images[0].newTag = "${{ steps.vars.outputs.tag }}"'
+
+      - name: Update Kustomize image tag
+        run: |
+          yq -i \
+            '.images[0].newTag = "${{ steps.vars.outputs.tag }}"' \
             k8s/overlays/poc/kustomization.yaml
 
       - name: Show updated Kustomize file
         run: |
-          cat "$KUSTOMIZE_FILE"
+          cat k8s/overlays/poc/kustomization.yaml
 
       - name: Validate Kustomize rendering
         run: |
           kubectl kustomize k8s/overlays/poc
 
       - name: Commit GitOps update
-        id: gitops_commit
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email \
-            "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add "$KUSTOMIZE_FILE"
+          git add k8s/overlays/poc/kustomization.yaml
 
           if git diff --cached --quiet; then
-            echo "No Kustomize changes detected."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes to commit."
             exit 0
           fi
 
           git commit \
-            -m "chore: update image to ${{ steps.vars.outputs.tag }} [skip ci]"
+            -m "chore: update devsecops-demo image to ${{ steps.vars.outputs.tag }}"
 
-          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-
-          git push origin main
-
-      - name: Install ArgoCD CLI
-        run: |
-          curl -sSL \
-            -o /usr/local/bin/argocd \
-            https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-
-          chmod +x /usr/local/bin/argocd
-
-          argocd version --client
-
-      - name: Verify ArgoCD deployment
-        id: verify
-        if: steps.gitops_commit.outputs.changed == 'true'
-        continue-on-error: true
-        env:
-          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
-          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
-        run: |
-          echo "Waiting for ArgoCD application to become Synced and Healthy..."
-
-          argocd app wait "$ARGOCD_APP" \
-            --server "$ARGOCD_SERVER" \
-            --auth-token "$ARGOCD_AUTH_TOKEN" \
-            --grpc-web \
-            --sync \
-            --health \
-            --timeout 300
-
-      - name: Deployment successful
-        if: steps.verify.outcome == 'success'
-        run: |
-          echo "Deployment completed successfully."
-          echo "Application: $ARGOCD_APP"
-          echo "Image tag: ${{ steps.vars.outputs.tag }}"
-
-      - name: Rollback failed deployment
-        if: steps.verify.outcome == 'failure'
-        run: |
-          echo "Deployment verification failed."
-          echo "Reverting GitOps image-tag commit..."
-
-          git config user.name "github-actions[bot]"
-          git config user.email \
-            "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git pull --rebase origin main
-
-          git revert \
-            --no-edit \
-            "${{ steps.gitops_commit.outputs.commit }}"
-
-          git push origin main
-
-          echo "Rollback commit pushed."
-
-      - name: Verify rollback
-        if: steps.verify.outcome == 'failure'
-        env:
-          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
-          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
-        run: |
-          echo "Waiting for ArgoCD rollback..."
-
-          argocd app wait "$ARGOCD_APP" \
-            --server "$ARGOCD_SERVER" \
-            --auth-token "$ARGOCD_AUTH_TOKEN" \
-            --grpc-web \
-            --sync \
-            --health \
-            --timeout 300
-
-      - name: Fail pipeline after rollback
-        if: steps.verify.outcome == 'failure'
-        run: |
-          echo "New deployment failed."
-          echo "Rollback completed."
-          exit 1
+          git push
