@@ -9,4 +9,4 @@ replicas:
     count: 4
 images:
   - name: aimocont2020/devsecops-demo
-    newTag: "d20f69cd8517"
+    newTag: "0fa9cb9a79ca"
