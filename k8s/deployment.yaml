@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: devsecops-demo
-          image: aimocont2020/devsecops-demo:6ab85ad7948d
+          image: aimocont2020/devsecops-demo
 
           ports:
             - containerPort: 80
