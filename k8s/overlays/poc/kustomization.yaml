@@ -1,12 +1,23 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
 namespace: devsecops
+
 resources:
   - ../../base
-replicas:
-  - name: devsecops-demo
-    count: 4
+
 images:
   - name: aimocont2020/devsecops-demo
     newTag: "4fe71544f6a0"
+
+patches:
+  - target:
+      group: argoproj.io
+      version: v1alpha1
+      kind: Rollout
+      name: devsecops-demo
+    patch: |-
+      - op: add
+        path: /spec/replicas
+        value: 4
