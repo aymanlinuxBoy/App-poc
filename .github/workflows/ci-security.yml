@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # ---------------------------------------------------
       # Dockerfile linting
@@ -49,8 +51,6 @@ jobs:
       # ---------------------------------------------------
       - name: Gitleaks
         uses: gitleaks/gitleaks-action@v2
-        with:
-             fetch-depth: 0
 
       # ---------------------------------------------------
       # Infrastructure / Kubernetes security scanning
