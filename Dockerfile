@@ -1,4 +1,4 @@
-FROM nginx:1.27-alpine
+FROM nginxinc/nginx-unprivileged:1.30.4-alpine-slim
 
 COPY src/index.html /usr/share/nginx/html/index.html
 
