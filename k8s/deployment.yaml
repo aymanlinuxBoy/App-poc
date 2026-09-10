@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: devsecops-demo
-          image: DOCKERHUB_USERNAME/devsecops-demo:latest
+          image: DOCKERHUB_USERNAME/devsecops-demo:6ab85ad7948d
 
           ports:
             - containerPort: 80
