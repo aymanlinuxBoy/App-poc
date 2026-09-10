@@ -15,7 +15,7 @@ spec:
 
       provider:
         prometheus:
-          address: http://prometheus-server.monitoring.svc.cluster.local
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
 
           query: |
             sum(
