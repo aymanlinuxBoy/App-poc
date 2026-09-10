@@ -6,4 +6,4 @@ resources:
   - ../../base
 images:
   - name: aimocont2020/devsecops-demo
-    newTag: "0b9ceb54ec83"
+    newTag: "07f02a2158c6"
