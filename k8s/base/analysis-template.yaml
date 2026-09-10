@@ -18,16 +18,4 @@ spec:
           address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
 
           query: |
-            sum(
-              rate(
-                http_requests_total{
-                  status!~"5.."
-                }[1m]
-              )
-            )
-            /
-            sum(
-              rate(
-                http_requests_total[1m]
-              )
-            )
+            sum(up)
