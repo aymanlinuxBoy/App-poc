@@ -1,6 +1,6 @@
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: Rollout
 metadata:
   name: devsecops-demo
 
@@ -23,3 +23,15 @@ spec:
 
           ports:
             - containerPort: 8080
+
+
+              strategy:
+    canary:
+      steps:
+        - setWeight: 10
+        - pause: {}
+
+        - setWeight: 50
+        - pause: {}
+
+        - setWeight: 100
