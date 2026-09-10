@@ -8,5 +8,5 @@ resources:
   - ../../base
 
 images:
-  - name: aymanlinuxboy/devsecops-demo
+  - name: aimocont2020/devsecops-demo
     newTag: "1.0.0"
