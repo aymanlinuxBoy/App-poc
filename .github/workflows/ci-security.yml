@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - "k8s/overlays/poc/kustomization.yaml"
   pull_request:
     branches:
       - main
