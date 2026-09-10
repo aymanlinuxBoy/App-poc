@@ -6,7 +6,7 @@ resources:
   - ../../base
 images:
   - name: aimocont2020/devsecops-demo
-    newTag: "98ce2db16caa"
+    newTag: "568343be55fb"
 patches:
   - target:
       group: argoproj.io
