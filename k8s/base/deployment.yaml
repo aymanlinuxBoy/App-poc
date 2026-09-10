@@ -1,12 +1,10 @@
 ---
-apiVersion: apps/v1
+apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: devsecops-demo
 
 spec:
-  #replicas: 3
-
   selector:
     matchLabels:
       app: devsecops-demo
@@ -20,12 +18,10 @@ spec:
       containers:
         - name: devsecops-demo
           image: aimocont2020/devsecops-demo
-
           ports:
             - containerPort: 8080
 
-
-              strategy:
+  strategy:
     canary:
       steps:
         - setWeight: 10
