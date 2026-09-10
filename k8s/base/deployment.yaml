@@ -25,9 +25,15 @@ spec:
     canary:
       steps:
         - setWeight: 10
-        - pause: {}
+
+        - analysis:
+            templates:
+              - templateName: devsecops-success-rate
 
         - setWeight: 50
-        - pause: {}
+
+        - analysis:
+            templates:
+              - templateName: devsecops-success-rate
 
         - setWeight: 100
