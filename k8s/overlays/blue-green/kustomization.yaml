@@ -9,7 +9,7 @@ resources:
 
 images:
   - name: aimocont2020/devsecops-demo
-    newTag: "51612ec3ecbb"
+    newTag: "a780690c9b7e"
 
 patches:
   - target:
