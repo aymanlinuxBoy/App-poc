@@ -5,7 +5,7 @@ kind: Kustomization
 namespace: devsecops-bg
 
 resources:
-  - ../../base-blue-green
+  - ../../base/blue-green
 
 images:
   - name: aimocont2020/devsecops-demo
