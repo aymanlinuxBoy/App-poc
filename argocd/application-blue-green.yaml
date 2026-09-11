@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/aymanlinuxBoy/App-poc.git
     targetRevision: main
-    path: k8s/base/blue-green
+    path: k8s/overlays/blue-green
 
   destination:
     name: downstream
