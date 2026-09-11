@@ -1,0 +1,37 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: devsecops-demo-bg
+
+spec:
+  replicas: 4
+
+  selector:
+    matchLabels:
+      app: devsecops-demo-bg
+
+  template:
+    metadata:
+      labels:
+        app: devsecops-demo-bg
+
+    spec:
+      containers:
+        - name: devsecops-demo
+          image: aimocont2020/devsecops-demo
+          ports:
+            - containerPort: 8080
+
+  strategy:
+    blueGreen:
+      activeService: devsecops-demo-active
+      previewService: devsecops-demo-preview
+
+      autoPromotionEnabled: true
+
+      prePromotionAnalysis:
+        templates:
+          - templateName: devsecops-prometheus-test
+
+      scaleDownDelaySeconds: 30
