@@ -1,0 +1,30 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: devsecops-bg
+resources:
+  - ../../base
+images:
+  - name: aimocont2020/devsecops-demo
+    newTag: "51612ec3ecbb"
+patches:
+  - target:
+      group: argoproj.io
+      version: v1alpha1
+      kind: Rollout
+      name: devsecops-demo
+    patch: |-
+      - op: add
+        path: /spec/replicas
+        value: 4
+      - op: replace
+        path: /spec/strategy
+        value:
+          blueGreen:
+            activeSlot: blue
+            prePromotionAnalysis:
+              templates:
+                - templateName: devsecops-success-rate
+            postPromotionAnalysis:
+              templates:
+                - templateName: devsecops-success-rate
